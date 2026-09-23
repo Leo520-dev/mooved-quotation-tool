@@ -283,9 +283,6 @@
   }
   /* ===== 语言切换按钮 ===== */
   .langbtn{ background:var(--orange) !important; border-color:var(--orange) !important; color:#fff !important; }
-  /* ===== 金额大写行 ===== */
-  .amount-words{ margin-top:2.4mm; font-size:10pt; font-weight:bold; color:var(--navy); word-break:break-word; }
-  .amount-words .aw-label{ color:var(--blue); }
   /* ===== 移动端适配 ===== */
   @media screen and (max-width:900px){
     body{ background:#fff; }
@@ -384,7 +381,6 @@
       <span data-i18n="totalAmount">TOTAL AMOUNT(Cedis)</span>
       <span class="v" id="totalCedis">0.00</span>
     </div>
-    <div class="amount-words"><span class="aw-label" data-i18n="amountWordsLabel">SAY:</span> <span id="amountWords"></span></div>
   </div>
 
   <div class="terms">
@@ -645,7 +641,6 @@
     'thPrice': {zh: '单价 (GHS)', en: 'Unit Price (GHS)'},
     'thTotal': {zh: '总额 (GHS)', en: 'Total (GHS)'},
     'totalAmount': {zh: '合计金额（加纳塞地）', en: 'TOTAL AMOUNT(Cedis)'},
-    'amountWordsLabel': {zh: '大写金额：', en: 'SAY:'},
     'payTermsHead': {zh: '付款条款', en: 'PAYMENT TERMS'},
     'termsCondHead': {zh: '条款与条件', en: 'TERMS & CONDITIONS'},
     'signAuthorized': {zh: '授权人：', en: 'Authorized by:'},
@@ -791,76 +786,6 @@
     return LANG;
   }
   window.toggleLang = toggleLang;
-
-  /* ============ 金额大写 ============ */
-  var AW_ONES = ['', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'];
-  var AW_TEENS = ['TEN', 'ELEVEN', 'TWELVE', 'THIRTEEN', 'FOURTEEN', 'FIFTEEN', 'SIXTEEN', 'SEVENTEEN', 'EIGHTEEN', 'NINETEEN'];
-  var AW_TENS = ['', '', 'TWENTY', 'THIRTY', 'FORTY', 'FIFTY', 'SIXTY', 'SEVENTY', 'EIGHTY', 'NINETY'];
-  function awThree(n){
-    var s = '';
-    var h = Math.floor(n / 100);
-    if(h){ s += AW_ONES[h] + ' HUNDRED'; n %= 100; if(n) s += ' AND'; }
-    if(n >= 20){ if(s) s += ' '; s += AW_TENS[Math.floor(n / 10)]; if(n % 10) s += '-' + AW_ONES[n % 10]; }
-    else if(n >= 10){ if(s) s += ' '; s += AW_TEENS[n - 10]; }
-    else if(n > 0){ if(s) s += ' '; s += AW_ONES[n]; }
-    return s;
-  }
-  function numToWordsEn(n){
-    n = Math.round(n * 100) / 100;
-    var cedis = Math.floor(n);
-    var pes = Math.round((n - cedis) * 100);
-    if(pes === 100){ cedis += 1; pes = 0; }
-    if(cedis === 0 && pes === 0) return 'ZERO CEDIS ONLY';
-    var scales = ['', ' THOUSAND', ' MILLION', ' BILLION'];
-    var parts = [], c = cedis, i = 0;
-    while(c > 0){ var r = c % 1000; if(r) parts.unshift(awThree(r) + scales[i]); c = Math.floor(c / 1000); i++; }
-    var s = parts.join('');
-    s += ' CEDIS';
-    if(pes > 0) s += ' AND ' + awThree(pes) + ' PESEWAS';
-    s += ' ONLY';
-    return s;
-  }
-  var CN_DIG = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'];
-  var CN_UNIT = ['', '拾', '佰', '仟'];
-  function cn4(n){
-    if(n === 0) return '零';
-    var s = '', ds = String(n), zero = false;
-    for(var i = 0; i < ds.length; i++){
-      var d = parseInt(ds[i], 10), pos = ds.length - 1 - i;
-      if(d === 0){ zero = true; }
-      else { if(zero && s) s += '零'; s += CN_DIG[d] + CN_UNIT[pos]; zero = false; }
-    }
-    return s;
-  }
-  function numToWordsZh(n){
-    n = Math.round(n * 100) / 100;
-    var cedis = Math.floor(n);
-    var pes = Math.round((n - cedis) * 100);
-    if(pes === 100){ cedis += 1; pes = 0; }
-    if(cedis === 0 && pes === 0) return '零加纳塞地整';
-    var s = '';
-    if(cedis > 0){
-      var yi = Math.floor(cedis / 100000000);
-      var wan = Math.floor((cedis % 100000000) / 10000);
-      var ge = cedis % 10000;
-      var yStr = '', wStr = '', gStr = '';
-      if(ge) gStr = cn4(ge);
-      if(wan){ wStr = cn4(wan) + '万'; if(ge && ge < 1000) gStr = '零' + gStr; }
-      if(yi){ yStr = cn4(yi) + '亿'; if(wan && wan < 1000) wStr = '零' + wStr; if(!wan && ge && ge < 1000) gStr = '零' + gStr; }
-      s = yStr + wStr + gStr + '加纳塞地';
-    } else {
-      s = '零加纳塞地';
-    }
-    if(pes > 0){ if(pes < 10 && cedis > 0) s += '零'; s += cn4(pes) + '比塞瓦'; }
-    s += '整';
-    return s;
-  }
-  function updateAmountWords(sum){
-    var el = document.getElementById('amountWords');
-    if(!el) return;
-    el.textContent = (LANG === 'zh') ? numToWordsZh(sum) : numToWordsEn(sum);
-  }
-
   /* ============ 语言应用 ============ */
   function applyLang(){
     var nodes = document.querySelectorAll('[data-i18n]');
@@ -887,7 +812,6 @@
     if(typeof fillParamsForm === 'function') fillParamsForm();
     if(typeof admResetMaterialForm === 'function') admResetMaterialForm();
   }
-
 
   /* ================================================================
      内置默认材料库（localStorage 无数据时回退到此库）
@@ -1231,7 +1155,6 @@
     }
     sum = Math.round(sum * 100) / 100;
     totalCedisEl.textContent = fmt2(sum);
-    updateAmountWords(sum);
     if(!roiCostDirty){
       document.getElementById('pCost').value = Math.round(sum * 100) / 100;
     }
