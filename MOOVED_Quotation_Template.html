@@ -998,6 +998,18 @@
   function fmt2(n){
     return n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
   }
+  function parsePrice(v){
+    v = String(v == null ? '' : v).replace(/,/g, '');
+    return parseFloat(v);
+  }
+  function fmtPriceInput(inp){
+    var v = parsePrice(inp.value);
+    if(!isNaN(v) && String(inp.value).trim() !== '') inp.value = fmt2(v);
+  }
+  function unFmtPriceInput(inp){
+    var s = String(inp.value).replace(/,/g, '');
+    if(s !== inp.value) inp.value = s;
+  }
 
   /* ============ 行渲染 ============ */
   function rowTemplate(catKey, specIdx, qty, priceOverride){
@@ -1009,7 +1021,7 @@
       '<td class="c-desc" contenteditable="true"></td>' +
       '<td class="c-unit"></td>' +
       '<td class="c-qty"><input type="number" min="0" step="1"></td>' +
-      '<td class="c-price"><input type="number" min="0" step="any"></td>' +
+      '<td class="c-price"><input type="text" inputmode="decimal" style="text-align:right"></td>' +
       '<td class="c-total"></td>';
 
     var itemSel = tr.querySelector('.sel-item');
@@ -1072,6 +1084,7 @@
       if(priceInput.value === '' || priceInput.dataset.auto === '1'){
         priceInput.value = item.price;
         priceInput.dataset.auto = '1';
+        fmtPriceInput(priceInput);
       }
     }
 
@@ -1099,10 +1112,12 @@
     specCustom.addEventListener('input', calc);
     qtyInput.addEventListener('input', calc);
     priceInput.addEventListener('input', function(){ priceInput.dataset.auto = '0'; calc(); });
+    priceInput.addEventListener('focus', function(){ unFmtPriceInput(priceInput); });
+    priceInput.addEventListener('blur', function(){ fmtPriceInput(priceInput); });
 
     if(qty != null && qty !== '') qtyInput.value = qty;
     renderSpecs(specIdx);
-    if(priceOverride != null && priceOverride !== ''){ priceInput.value = priceOverride; priceInput.dataset.auto = '0'; }
+    if(priceOverride != null && priceOverride !== ''){ priceInput.value = priceOverride; priceInput.dataset.auto = '0'; fmtPriceInput(priceInput); }
 
     tr.querySelector('.del-row').addEventListener('click', function(){
       if(tbody.rows.length <= 1) return;
@@ -1155,7 +1170,7 @@
     var sum = 0, rows = tbody.rows;
     for(var i = 0; i < rows.length; i++){
       var q = parseFloat(rows[i].querySelector('.c-qty input').value);
-      var p = parseFloat(rows[i].querySelector('.c-price input').value);
+      var p = parsePrice(rows[i].querySelector('.c-price input').value);
       var totalCell = rows[i].querySelector('.c-total');
       if(!isNaN(q) && !isNaN(p) && q >= 0 && p >= 0){
         var t = Math.round(q * p * 100) / 100;
