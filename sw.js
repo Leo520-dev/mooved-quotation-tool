@@ -2,7 +2,7 @@
  * 与 MOOVED_Quotation_Template.html 同目录部署。
  * 策略：网络优先 + 缓存回退（保证更新及时，离线可用）。
  */
-var CACHE_NAME = 'mooved-quote-v1';
+var CACHE_NAME = 'mooved-quote-v2';
 var CORE = [
   './MOOVED_Quotation_Template.html',
   './'

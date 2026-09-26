@@ -100,8 +100,12 @@
     vertical-align:middle; white-space:normal; word-break:break-word; overflow-wrap:break-word; min-width:0;
   }
   #quoteTable tbody tr:nth-child(even) td, #quoteTable tbody tr.zebra td{ background:var(--zebra); }
+  /* 斑马纹显式兜底：Unit Price / Total 两列必须与其余列同步隔行变色（特异性 1-2-3 压过列类规则） */
+  #quoteTable tbody tr:nth-child(even) td.c-price, #quoteTable tbody tr:nth-child(even) td.c-total,
+  #quoteTable tbody tr.zebra td.c-price, #quoteTable tbody tr.zebra td.c-total{ background:var(--zebra); }
+  #quoteTable td.c-price input, #quoteTable td.c-total input{ background:transparent; }
   #quoteTable td input, #quoteTable td select{
-    width:100%; border:none; background:transparent; font-family:inherit; font-size:9.2pt;
+    width:100%; box-sizing:border-box; border:none; background:transparent; font-family:inherit; font-size:9.2pt;
     text-align:inherit; color:var(--text); -webkit-appearance:none; appearance:none;
   }
   #quoteTable td input.item-custom, #quoteTable td input.spec-custom{
@@ -114,15 +118,15 @@
   input[type=number]{ -moz-appearance:textfield; appearance:textfield; }
   [contenteditable]:hover{ background:#FFF7E0; outline:1px dashed var(--orange); }
   [contenteditable]:focus{ outline:1px dashed var(--orange); }
-  /* 列宽：自动分配，加宽为第一优先级，长文本自动换行不截断 */
-  #quoteTable .c-no{ white-space:nowrap; text-align:center; min-width:8mm; }
-  #quoteTable .c-item{ min-width:28mm; }
-  #quoteTable .c-spec{ min-width:40mm; }
-  #quoteTable .c-desc{ min-width:34mm; word-break:break-word; overflow-wrap:break-word; }
-  #quoteTable .c-unit{ white-space:nowrap; text-align:center; min-width:9mm; }
-  #quoteTable .c-qty{ white-space:nowrap; text-align:center; min-width:8mm; }
-  #quoteTable .c-price{ white-space:nowrap; text-align:right; min-width:20mm; }
-  #quoteTable .c-total{ white-space:nowrap; text-align:right; min-width:24mm; }
+  /* 列宽：自动分配，加宽为第一优先级，长文本自动换行不截断（td 前缀提升特异性，压过 #quoteTable td{min-width:0}） */
+  #quoteTable td.c-no{ white-space:nowrap; text-align:center; min-width:7mm; }
+  #quoteTable td.c-item{ min-width:40mm; }
+  #quoteTable td.c-spec{ min-width:62mm; }
+  #quoteTable td.c-desc{ min-width:30mm; word-break:break-word; overflow-wrap:break-word; }
+  #quoteTable td.c-unit{ white-space:nowrap; text-align:center; min-width:8mm; }
+  #quoteTable td.c-qty{ white-space:nowrap; text-align:center; min-width:7mm; }
+  #quoteTable td.c-price{ white-space:nowrap; text-align:right; min-width:18mm; }
+  #quoteTable td.c-total{ white-space:nowrap; text-align:right; min-width:20mm; }
   #quoteTable td.c-no, #quoteTable td.c-unit{ text-align:center; }
   #quoteTable td.c-qty{ text-align:center; }
   td.c-price, td.c-total{ text-align:right; }
@@ -215,6 +219,14 @@
     #quoteTable td{ font-size:8.4pt; padding:1.1mm .8mm; }
     #quoteTable td input, #quoteTable td select{ font-size:8.4pt; }
     #quoteTable tr{ break-inside:avoid; page-break-inside:avoid; }
+    /* 打印态斑马纹强制保留（双保险：print-color-adjust + 显式背景） */
+    #quoteTable tbody tr:nth-child(even) td, #quoteTable tbody tr.zebra td,
+    #quoteTable tbody tr:nth-child(even) td.c-price, #quoteTable tbody tr:nth-child(even) td.c-total,
+    #quoteTable tbody tr.zebra td.c-price, #quoteTable tbody tr.zebra td.c-total{
+      background:var(--zebra) !important;
+      -webkit-print-color-adjust:exact; print-color-adjust:exact;
+    }
+    #quoteTable th{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .totals{ margin-top:1mm; }
     .t-row{ padding:1mm 2mm; font-size:9.5pt; }
     .terms .t-head{ font-size:9.5pt; margin:.4mm 0 .3mm; }
